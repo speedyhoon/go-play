@@ -75,11 +75,11 @@ type fmtResponse struct {
 
 var tmpdir string
 
-// FmtHandler handles a Go-source format request. The go source code
+// fmtHandler handles a Go-source format request. The go source code
 // is given in req and the formated output is passed back in w.  Errors
 // are wrapped in <pre> tags and returned in re.
 // This routine must be called via an HTTP POST request.
-func FmtHandler(w http.ResponseWriter, req *http.Request) {
+func fmtHandler(w http.ResponseWriter, req *http.Request) {
 	resp := new(fmtResponse)
 	if req.Method != "POST" {
 		http.Error(w, "Forbidden, need POST", http.StatusForbidden)
@@ -125,10 +125,10 @@ type compileResponse struct {
 	Error  string
 }
 
-// CompileHandler is an HTTP handler that reads Go source code from req,
+// compileHandler is an HTTP handler that reads Go source code from req,
 // runs the program (returning any errors),
 // and sends the program's output as the HTTP response to w.
-func CompileHandler(w http.ResponseWriter, req *http.Request) {
+func compileHandler(w http.ResponseWriter, req *http.Request) {
 	resp := new(compileResponse)
 	if req.Method != "POST" {
 		http.Error(w, "Forbidden, need POST", http.StatusForbidden)
@@ -264,7 +264,7 @@ func run(dir string, env []string, args []string) ([]byte, []byte, error) {
 /*********************************************************************************/
 // Now compile+run via websockets
 
-// Environ, if non-nil, is used to provide an environment to go command and
+// Environ if non-nil, is used to provide an environment to go command and
 // user binary invocations.
 var Environ func() []string
 
@@ -302,10 +302,10 @@ func init() {
 	}()
 }
 
-// WSCompileRunHandler handles the websocket connection for a given compile/run action.
+// wsCompileRunHandler handles the websocket connection for a given compile/run action.
 // It handles transcoding Messages to and from JSON format, and handles starting
 // and killing processes.
-func WSCompileRunHandler(c *websocket.Conn) {
+func wsCompileRunHandler(c *websocket.Conn) {
 	c.Config()
 	in, out := make(chan *Message), make(chan *Message)
 	errc := make(chan error, 1)
@@ -555,7 +555,7 @@ func (w *messageWriter) Write(b []byte) (n int, err error) {
 const defaultSaveName = "save"
 const goPathSuffix = ".go"
 
-// SaveHandler writes a Go program to file.
+// saveHandler writes a Go program to file.
 //
 // We have to do this in Go since HTML5 Doesn't grok file paths.
 //
@@ -564,7 +564,7 @@ const goPathSuffix = ".go"
 // /save/Xtmp/save.go. The latter refers to ./tmp/save.go.
 //
 // This routine must be called via POST.
-func SaveHandler(w http.ResponseWriter, req *http.Request) {
+func saveHandler(w http.ResponseWriter, req *http.Request) {
 	filename := defaultSaveName
 	// +3 for enclosing "/X", e.g. "/save/X" not "save"
 	SaveLen := len(defaultSaveName) + 3
@@ -583,7 +583,7 @@ func SaveHandler(w http.ResponseWriter, req *http.Request) {
 	body := new(bytes.Buffer)
 	_, err := body.ReadFrom(req.Body)
 	if err != nil {
-		http.Error(w, "Server Error in SaveHandler reading Body text",
+		http.Error(w, "Server Error in saveHandler reading Body text",
 			http.StatusInternalServerError)
 		return
 	}
@@ -610,7 +610,7 @@ func SaveHandler(w http.ResponseWriter, req *http.Request) {
 
 /*******************/
 
-func ShareHandler(w http.ResponseWriter, req *http.Request) {
+func shareHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Redirecting\n")
 	http.Redirect(w, req, "http://play.golang.org/share", http.StatusFound)
 }
@@ -644,12 +644,12 @@ func main() {
 		log.Fatal(err)
 	}
 	http.HandleFunc("/", edit)
-	http.HandleFunc("/compile", CompileHandler)
-	http.HandleFunc("/fmt", FmtHandler)
-	http.HandleFunc("/save", SaveHandler)
-	http.HandleFunc("/share", ShareHandler)
-	http.HandleFunc("/save/", SaveHandler)
-	http.Handle("/wscompile", websocket.Handler(WSCompileRunHandler))
+	http.HandleFunc("/compile", compileHandler)
+	http.HandleFunc("/fmt", fmtHandler)
+	http.HandleFunc("/save", saveHandler)
+	http.HandleFunc("/share", shareHandler)
+	http.HandleFunc("/save/", saveHandler)
+	http.Handle("/wscompile", websocket.Handler(wsCompileRunHandler))
 
 	http.Handle("/static/", http.StripPrefix("/static/",
 		http.FileServer(http.Dir("../static"))))
