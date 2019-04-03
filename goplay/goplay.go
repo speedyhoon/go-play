@@ -635,7 +635,7 @@ func main() {
 
 	http.Handle("/static/", http.StripPrefix("/static/",
 		http.FileServer(http.Dir("../static"))))
-	fmt.Printf("Runnning Go Play. Attempting to listening on %s\n",
+	fmt.Printf("Runnning Go Play. Attempting to listen on %s\n",
 		*httpListen)
 	log.Fatal(http.ListenAndServe(*httpListen, nil))
 }
