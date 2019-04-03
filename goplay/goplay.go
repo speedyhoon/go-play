@@ -621,8 +621,7 @@ var (
 	httpListen = flag.String("http", "127.0.0.1:3998",
 		"host:port to listen on")
 	//htmlOutput   = flag.Bool("html", false, "render program output as HTML")
-	resourceDir  = "../static"
-	resourceDirP = &resourceDir
+	resourceDir = "../static"
 	// resourceDir = flag.String("resource-root", "../static",
 	// 	"Location of CSS and JavaScript resources")
 )
@@ -690,7 +689,7 @@ func edit(w http.ResponseWriter, req *http.Request) {
 	}
 
 	snip := &Snippet{Body: data}
-	err = editTemplate.Execute(w, &editData{snip, *resourceDirP})
+	err = editTemplate.Execute(w, &editData{snip, resourceDir})
 	if err != nil {
 		log.Println(err)
 	}
