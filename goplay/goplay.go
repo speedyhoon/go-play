@@ -268,7 +268,7 @@ func run(dir string, env []string, args []string) ([]byte, []byte, error) {
 // user binary invocations.
 var Environ func() []string
 
-const msgLimit = 1000 // max number of messages to send per session
+//const msgLimit = 1000 // max number of messages to send per session
 
 // Message is the wire format for the websocket connection to the browser.
 // It is used for both sending output messages and receiving commands, as
@@ -620,7 +620,7 @@ func ShareHandler(w http.ResponseWriter, req *http.Request) {
 var (
 	httpListen = flag.String("http", "127.0.0.1:3998",
 		"host:port to listen on")
-	htmlOutput   = flag.Bool("html", false, "render program output as HTML")
+	//htmlOutput   = flag.Bool("html", false, "render program output as HTML")
 	resourceDir  = "../static"
 	resourceDirP = &resourceDir
 	// resourceDir = flag.String("resource-root", "../static",
