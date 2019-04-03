@@ -101,7 +101,7 @@ func FmtHandler(w http.ResponseWriter, req *http.Request) {
 
 func gofmt(body string) (string, error) {
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, "prog.go", body, parser.ParseComments)
+	f, err := parser.ParseFile(fset, "prog"+goPathSuffix, body, parser.ParseComments)
 	if err != nil {
 		return "", err
 	}
@@ -164,7 +164,7 @@ func CompileHandler(w http.ResponseWriter, req *http.Request) {
 func compile(body string, buildOpts string, runOpts string, runEnv []string) (stdout []byte, stderr []byte, err error) {
 	// x is the base name for .go, .6, executable files
 	x := filepath.Join(tmpdir, "compile"+strconv.Itoa(<-uniq))
-	src := x + ".go"
+	src := x + goPathSuffix
 	bin := x
 	if runtime.GOOS == "windows" {
 		bin += ".exe"
@@ -552,8 +552,8 @@ func (w *messageWriter) Write(b []byte) (n int, err error) {
 
 /*********************************************************************************/
 
-const DefaultSaveName = "save"
-const GoPathSuffix = ".go"
+const defaultSaveName = "save"
+const goPathSuffix = ".go"
 
 // SaveHandler writes a Go program to file.
 //
@@ -565,9 +565,9 @@ const GoPathSuffix = ".go"
 //
 // This routine must be called via POST.
 func SaveHandler(w http.ResponseWriter, req *http.Request) {
-	filename := DefaultSaveName
+	filename := defaultSaveName
 	// +3 for enclosing "/X", e.g. "/save/X" not "save"
-	SaveLen := len(DefaultSaveName) + 3
+	SaveLen := len(defaultSaveName) + 3
 	if len(req.URL.Path) > SaveLen {
 		filename = req.URL.Path[SaveLen:]
 		if filename[0] != '/' {
@@ -592,8 +592,8 @@ func SaveHandler(w http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 	}
 
-	if filename[len(filename)-len(GoPathSuffix):] != GoPathSuffix {
-		filename += GoPathSuffix
+	if filename[len(filename)-len(goPathSuffix):] != goPathSuffix {
+		filename += goPathSuffix
 	}
 	err = ioutil.WriteFile(filename, body.Bytes(), 0600)
 	if err != nil {
