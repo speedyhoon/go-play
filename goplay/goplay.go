@@ -93,7 +93,10 @@ func FmtHandler(w http.ResponseWriter, req *http.Request) {
 	} else {
 		resp.Body = body
 	}
-	json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func gofmt(body string) (string, error) {
@@ -152,7 +155,10 @@ func CompileHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	/* fmt.Printf("stdout is %s\n", resp.Stdout)
 	fmt.Printf("stderr is %s\n", resp.Stderr) */
-	json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func compile(body string, buildOpts string, runOpts string, runEnv []string) (stdout []byte, stderr []byte, err error) {
@@ -174,7 +180,12 @@ func compile(body string, buildOpts string, runOpts string, runEnv []string) (st
 	}()
 
 	// write body to x.go
-	defer os.Remove(src)
+	defer func(){
+		err := os.Remove(src)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 	if err = ioutil.WriteFile(src, []byte(body), 0666); err != nil {
 		return
 	}
@@ -187,7 +198,12 @@ func compile(body string, buildOpts string, runOpts string, runEnv []string) (st
 	}
 	buildArgs = append(buildArgs, file)
 	stdout, stderr, err = run(dir, nil, buildArgs)
-	defer os.Remove(bin)
+	defer func(){
+		err := os.Remove(bin)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 	if err != nil {
 		/* fmt.Printf("+++ stdout is %s\n", stdout)
 		fmt.Printf("+++ stderr is %s\n", stderr) */
@@ -396,7 +412,10 @@ func (p *Process) Kill() {
 	if p == nil {
 		return
 	}
-	p.run.Process.Kill()
+	err := p.run.Process.Kill()
+	if err != nil {
+		log.Println(err)
+	}
 	<-p.done
 }
 
@@ -418,13 +437,23 @@ func (p *Process) start(body string, buildOpts string,
 	}
 
 	// write body to x.go
-	defer os.Remove(src)
+	defer func(){
+		err := os.Remove(src)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 	if err := ioutil.WriteFile(src, []byte(body), 0666); err != nil {
 		return err
 	}
 
 	// build x.go, creating x
-	defer os.Remove(bin)
+	defer func(){
+		err := os.Remove(bin)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 	dir, file := filepath.Split(src)
 	var cmd *exec.Cmd
 	buildArgs := []string{"go", "build", "-o", bin}
@@ -558,7 +587,10 @@ func SaveHandler(w http.ResponseWriter, req *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	req.Body.Close()
+	err = req.Body.Close()
+	if err != nil {
+		log.Println(err)
+	}
 
 	if filename[len(filename)-len(GoPathSuffix):] != GoPathSuffix {
 		filename += GoPathSuffix
@@ -570,7 +602,10 @@ func SaveHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Printf("File: %s saved\n", filename)
-	w.Write([]byte(filename))
+	_, err = w.Write([]byte(filename))
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 /*******************/
@@ -655,7 +690,10 @@ func edit(w http.ResponseWriter, req *http.Request) {
 	}
 
 	snip := &Snippet{Body: data}
-	editTemplate.Execute(w, &editData{snip, *resourceDirP})
+	err = editTemplate.Execute(w, &editData{snip, *resourceDirP})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 var (
