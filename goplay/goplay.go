@@ -283,24 +283,7 @@ type Message struct {
 	SrcDir    string // Source Directory in run. Needs to be set for "go test"
 }
 
-func init() {
-	// find real path to temporary directory
-	var err error
-	tmpdir, err = filepath.EvalSymlinks(os.TempDir())
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 var uniq = make(chan int) // a source of numbers for naming temporary files
-
-func init() {
-	go func() {
-		for i := 0; ; i++ {
-			uniq <- i
-		}
-	}()
-}
 
 // wsCompileRunHandler handles the websocket connection for a given compile/run action.
 // It handles transcoding Messages to and from JSON format, and handles starting
