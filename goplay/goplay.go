@@ -65,7 +65,7 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"code.google.com/p/go.net/websocket"
+	"golang.org/x/net/websocket"
 )
 
 type fmtResponse struct {
@@ -180,7 +180,7 @@ func compile(body string, buildOpts string, runOpts string, runEnv []string) (st
 	}()
 
 	// write body to x.go
-	defer func(){
+	defer func() {
 		err := os.Remove(src)
 		if err != nil {
 			log.Println(err)
@@ -198,7 +198,7 @@ func compile(body string, buildOpts string, runOpts string, runEnv []string) (st
 	}
 	buildArgs = append(buildArgs, file)
 	stdout, stderr, err = run(dir, nil, buildArgs)
-	defer func(){
+	defer func() {
 		err := os.Remove(bin)
 		if err != nil {
 			log.Println(err)
@@ -437,7 +437,7 @@ func (p *Process) start(body string, buildOpts string,
 	}
 
 	// write body to x.go
-	defer func(){
+	defer func() {
 		err := os.Remove(src)
 		if err != nil {
 			log.Println(err)
@@ -448,7 +448,7 @@ func (p *Process) start(body string, buildOpts string,
 	}
 
 	// build x.go, creating x
-	defer func(){
+	defer func() {
 		err := os.Remove(bin)
 		if err != nil {
 			log.Println(err)
